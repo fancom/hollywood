@@ -169,15 +169,8 @@ func (s *SelfManaged) start(c *actor.Context) {
 }
 
 func (s *SelfManaged) initAutoDiscovery() {
-	// grab the eth1 interface.
-	iface, err := net.InterfaceByName("eth1")
-	if err != nil {
-		panic(err)
-	}
-
 	resolver, err := zeroconf.NewResolver(
 		zeroconf.SelectIPTraffic(zeroconf.IPv4),
-		zeroconf.SelectIfaces([]net.Interface{*iface}),
 	)
 	if err != nil {
 		log.Fatal(err)
