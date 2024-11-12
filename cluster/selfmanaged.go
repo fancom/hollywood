@@ -80,6 +80,12 @@ func NewSelfManagedProvider(config SelfManagedConfig) Producer {
 }
 
 func (s *SelfManaged) Receive(c *actor.Context) {
+	// When the announcer is empty, the actor is on an invalid system
+	if s.announcer == nil {
+		slog.Error("[DISCOVERY] Announcer is nil, actor is in error state")
+		return
+	}
+
 	switch msg := c.Message().(type) {
 	case actor.Started:
 		s.ctx, s.cancel = context.WithCancel(context.Background())
@@ -164,11 +170,12 @@ func (s *SelfManaged) start(c *actor.Context) {
 		}, c.PID())
 	}
 
-	s.initAutoDiscovery()
-	s.startAutoDiscovery()
+	if err := s.initAutoDiscovery(); err == nil {
+		s.startAutoDiscovery()
+	}
 }
 
-func (s *SelfManaged) initAutoDiscovery() {
+func (s *SelfManaged) initAutoDiscovery() error {
 	resolver, err := zeroconf.NewResolver(
 		zeroconf.SelectIPTraffic(zeroconf.IPv4),
 	)
@@ -195,9 +202,13 @@ func (s *SelfManaged) initAutoDiscovery() {
 		[]string{host},
 		[]string{"txtv=0", "lo=1", "la=2"}, nil)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("[DISCOVERY] Failed to register proxy", "err", err)
+
+		return err
 	}
 	s.announcer = server
+
+	return nil
 }
 
 func (s *SelfManaged) startAutoDiscovery() {
