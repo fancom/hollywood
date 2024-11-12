@@ -59,6 +59,8 @@ type SelfManaged struct {
 
 	membersAlive *MemberSet
 
+	errorState bool
+
 	resolver  *zeroconf.Resolver
 	announcer *zeroconf.Server
 
@@ -81,8 +83,8 @@ func NewSelfManagedProvider(config SelfManagedConfig) Producer {
 
 func (s *SelfManaged) Receive(c *actor.Context) {
 	// When the announcer is empty, the actor is on an invalid system
-	if s.announcer == nil {
-		slog.Error("[DISCOVERY] Announcer is nil, actor is in error state")
+	if s.errorState == true {
+		slog.Error("[DISCOVERY] Self managed is in error state")
 		return
 	}
 
@@ -203,6 +205,8 @@ func (s *SelfManaged) initAutoDiscovery() error {
 		[]string{"txtv=0", "lo=1", "la=2"}, nil)
 	if err != nil {
 		slog.Error("[DISCOVERY] Failed to register proxy", "err", err)
+
+		s.errorState = true
 
 		return err
 	}
