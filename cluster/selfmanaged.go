@@ -3,7 +3,6 @@ package cluster
 import (
 	"context"
 	"fmt"
-	"log"
 	"log/slog"
 	"net"
 	"reflect"
@@ -182,17 +181,17 @@ func (s *SelfManaged) initAutoDiscovery() error {
 		zeroconf.SelectIPTraffic(zeroconf.IPv4),
 	)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	s.resolver = resolver
 
 	host, portstr, err := net.SplitHostPort(s.cluster.agentPID.Address)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	port, err := strconv.Atoi(portstr)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	server, err := zeroconf.RegisterProxy(
