@@ -166,6 +166,7 @@ type SendRepeater struct {
 	msg      any
 	interval time.Duration
 	cancelch chan struct{}
+	chClosed bool
 }
 
 func (sr SendRepeater) start() {
@@ -185,6 +186,10 @@ func (sr SendRepeater) start() {
 
 // Stop will stop the repeating message.
 func (sr SendRepeater) Stop() {
+	if sr.chClosed {
+		return
+	}
+	sr.chClosed = true
 	close(sr.cancelch)
 }
 
