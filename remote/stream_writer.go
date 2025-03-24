@@ -131,6 +131,7 @@ func (s *streamWriter) init() {
 			slog.Debug("remote using TLS for writing")
 			rawconn, err = tls.Dial("tcp", s.writeToAddr, s.tlsConfig)
 			if err != nil {
+				rawconn = nil
 				d := time.Duration(delay * time.Duration(i*2))
 				slog.Error("tls.Dial", "err", err, "remote", s.writeToAddr, "retry", i, "max", maxRetries, "delay", d)
 				time.Sleep(d)
