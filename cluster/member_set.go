@@ -33,6 +33,18 @@ func (s *MemberSet) Add(member *Member) {
 }
 
 func (s *MemberSet) Contains(member *Member) bool {
+	if s == nil {
+		return false
+	}
+
+	if member == nil {
+		return false
+	}
+
+	if s.members == nil {
+		return false
+	}
+
 	_, ok := s.members[member.ID]
 	return ok
 }
